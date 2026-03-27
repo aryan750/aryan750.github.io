@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Aryan Gupta — Software Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:ital,wght@0,300;0,400;1,300&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2ec;
+    --surface: #ede9e0;
+    --surface2: #e5e0d5;
+    --border: rgba(30,25,15,0.1);
+    --text: #1a1810;
+    --muted: #7a7060;
+    --accent: #e8440a;
+    --font-display: 'Syne', sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-display); overflow-x: hidden; cursor: none; }
+
+  /* ── Cursor ── */
+  .cursor { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transition: transform 0.15s ease; }
+  .cursor-ring { width: 32px; height: 32px; border: 1.5px solid var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; opacity: 0.4; }
+
+  /* ── Loader ── */
+  #loader { position: fixed; inset: 0; background: var(--text); z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; transition: opacity 0.7s ease, visibility 0.7s ease; }
+  #loader.hidden { opacity: 0; visibility: hidden; }
+  .loader-text { font-size: 52px; font-weight: 800; color: var(--bg); letter-spacing: -0.05em; text-transform: uppercase; overflow: hidden; }
+  .loader-text span { display: inline-block; transform: translateY(100%); animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+  .loader-text span:nth-child(2) { animation-delay: 0.06s; }
+  .loader-text span:nth-child(3) { animation-delay: 0.12s; }
+  .loader-text span:nth-child(4) { animation-delay: 0.18s; }
+  .loader-text span:nth-child(5) { animation-delay: 0.24s; }
+  .loader-sub { font-family: var(--font-mono); font-size: 11px; color: rgba(245,242,236,0.4); letter-spacing: 0.2em; text-transform: uppercase; opacity: 0; animation: fadeIn 0.5s 0.5s forwards; }
+  .loader-bar-track { width: 180px; height: 1px; background: rgba(255,255,255,0.1); overflow: hidden; }
+  .loader-bar { height: 100%; background: var(--accent); animation: loadBar 1.3s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+  /* ── Keyframes ── */
+  @keyframes slideUp   { to { transform: translateY(0); } }
+  @keyframes fadeIn    { to { opacity: 1; } }
+  @keyframes loadBar   { from { width: 0; } to { width: 100%; } }
+  @keyframes fadeUp    { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse     { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.8); } }
+  @keyframes lineGrow  { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes slideLeft { from { opacity:0; transform: translateX(-28px); } to { opacity:1; transform: translateX(0); } }
+  @keyframes slideRight{ from { opacity:0; transform: translateX(28px); } to { opacity:1; transform: translateX(0); } }
+  @keyframes scaleIn   { from { opacity:0; transform: scale(0.92); } to { opacity:1; transform: scale(1); } }
+  @keyframes countUp   { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── Nav ── */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; padding: 24px 56px; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s, border-color 0.3s; border-bottom: 1px solid transparent; }
+  nav.scrolled { background: rgba(245,242,236,0.92); backdrop-filter: blur(16px); border-color: var(--border); }
+  .nav-logo { font-family: var(--font-mono); font-size: 13px; color: var(--accent); text-decoration: none; }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bg); background: var(--text); padding: 10px 20px; border-radius: 2px; text-decoration: none; transition: background 0.2s; }
+  .nav-cta:hover { background: var(--accent); }
+
+  /* ── Hero ── */
+  #hero { min-height: 100vh; display: grid; grid-template-rows: 1fr auto; padding: 0 56px 72px; position: relative; overflow: hidden; }
+  .hero-main { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 40px; }
+  .hero-eyebrow { display: flex; align-items: center; gap: 20px; margin-bottom: 32px; opacity: 0; animation: fadeUp 0.7s 0.5s forwards; }
+  .hero-eyebrow-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  .hero-eyebrow span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  h1.hero-name { font-size: clamp(68px, 10.5vw, 150px); font-weight: 800; letter-spacing: -0.045em; line-height: 0.88; text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s 0.65s forwards; }
+  h1.hero-name em { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 0.9em; color: var(--accent); letter-spacing: -0.02em; }
+  .hero-footer { display: flex; justify-content: space-between; align-items: flex-end; gap: 48px; border-top: 1px solid var(--border); padding-top: 32px; opacity: 0; animation: fadeUp 0.7s 0.9s forwards; }
+  .hero-desc { font-family: var(--font-serif); font-style: italic; font-size: clamp(16px, 1.5vw, 20px); color: var(--muted); max-width: 420px; line-height: 1.6; }
+  .hero-desc strong { color: var(--text); font-style: normal; font-weight: 400; }
+  .hero-stats { display: flex; gap: 48px; }
+  .hero-stat { text-align: right; }
+  .hero-stat-num { font-size: 32px; font-weight: 800; letter-spacing: -0.04em; color: var(--text); line-height: 1; }
+  .hero-stat-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+  .hero-bg-el { position: absolute; right: -80px; top: 50%; transform: translateY(-50%); width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(232,68,10,0.06) 0%, transparent 70%); pointer-events: none; }
+
+  /* ── Sections ── */
+  section { padding: 100px 56px; position: relative; }
+
+  /* Section label — slides in from left with line growing */
+  .section-label {
+    font-family: var(--font-mono); font-size: 11px; color: var(--accent);
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
+    opacity: 0; transform: translateX(-20px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+  .section-label::before {
+    content: ''; width: 24px; height: 1px; background: var(--accent);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.5s 0.2s ease;
+  }
+  .section-label.visible { opacity: 1; transform: translateX(0); }
+  .section-label.visible::before { transform: scaleX(1); }
+
+  /* Section title — big slide up */
+  .section-title {
+    font-size: clamp(40px, 5.5vw, 80px); font-weight: 800; letter-spacing: -0.04em;
+    line-height: 0.92; text-transform: uppercase; margin-bottom: 64px;
+    overflow: hidden;
+  }
+  .section-title em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--muted); }
+  .section-title .title-inner {
+    display: block;
+    transform: translateY(100%); opacity: 0;
+    transition: transform 0.75s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease;
+  }
+  .section-title.visible .title-inner { transform: translateY(0); opacity: 1; }
+  .section-title.visible .title-inner:nth-child(2) { transition-delay: 0.08s; }
+
+  /* ── About ── */
+  #about { background: var(--surface); border-top: 1px solid var(--border); }
+  .about-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 80px; align-items: start; }
+  .about-body p {
+    font-family: var(--font-serif); font-size: clamp(17px, 1.5vw, 20px);
+    color: var(--muted); line-height: 1.75; margin-bottom: 20px;
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .about-body p:nth-child(1) { transition-delay: 0s; }
+  .about-body p:nth-child(2) { transition-delay: 0.1s; }
+  .about-body p:nth-child(3) { transition-delay: 0.2s; }
+  .about-body.visible p { opacity: 1; transform: translateY(0); }
+  .about-body p strong { color: var(--text); font-weight: 400; }
+
+  .aside-block {
+    padding: 24px 0; border-bottom: 1px solid var(--border);
+    opacity: 0; transform: translateX(20px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+  .aside-block:first-child { border-top: 1px solid var(--border); }
+  .aside-block:nth-child(1) { transition-delay: 0.05s; }
+  .aside-block:nth-child(2) { transition-delay: 0.15s; }
+  .aside-block:nth-child(3) { transition-delay: 0.25s; }
+  .aside-block:nth-child(4) { transition-delay: 0.35s; }
+  .aside-block.visible { opacity: 1; transform: translateX(0); }
+  .aside-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; }
+  .aside-value { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip { font-family: var(--font-mono); font-size: 10px; padding: 5px 12px; border-radius: 100px; background: var(--bg); border: 1px solid var(--border); color: var(--text); letter-spacing: 0.04em; white-space: nowrap; }
+  .chip.red { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ── Experience ── */
+  #experience { border-top: 1px solid var(--border); }
+  .timeline { position: relative; }
+  .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--border); }
+
+  .tl-item {
+    display: grid; grid-template-columns: 220px 1fr; gap: 48px;
+    padding: 48px 0; border-bottom: 1px solid var(--border); position: relative;
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+  .tl-item.visible { opacity: 1; transform: translateY(0); }
+  .tl-item:nth-child(2) { transition-delay: 0.12s; }
+  .tl-item:nth-child(3) { transition-delay: 0.24s; }
+
+  .tl-item::before { content: ''; position: absolute; left: -4px; top: 56px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+  .tl-left { padding-left: 24px; }
+  .tl-period { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 8px; }
+  .tl-badge { display: inline-block; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; border: 1px solid var(--border); color: var(--muted); }
+  .tl-badge.current { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .tl-company { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px; }
+  .tl-role { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.06em; margin-bottom: 20px; }
+  .tl-bullets { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .tl-bullets li { font-family: var(--font-serif); font-size: 15px; color: var(--muted); line-height: 1.65; padding-left: 18px; position: relative; }
+  .tl-bullets li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-family: var(--font-mono); font-size: 12px; top: 2px; }
+  .tl-bullets li strong { color: var(--text); font-weight: 400; }
+  .tl-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px; }
+  .tag { font-family: var(--font-mono); font-size: 10px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 2px; color: var(--muted); letter-spacing: 0.04em; }
+
+  /* ── Skills ── */
+  #skills { background: var(--text); border-top: 1px solid var(--border); }
+  #skills .section-label { color: var(--accent); }
+  #skills .section-label::before { background: var(--accent); }
+  #skills .section-title { color: var(--bg); }
+  #skills .section-title em { color: rgba(245,242,236,0.3); }
+
+  .skills-bento { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.07); }
+  .skill-cell {
+    background: var(--text); padding: 32px 28px; transition: background 0.2s;
+    opacity: 0; transform: translateY(20px) scale(0.97);
+    /* JS will add visible class */
+  }
+  .skill-cell:hover { background: #22201a; }
+  .skill-cell.visible { opacity: 1; transform: none; transition: opacity 0.55s ease, transform 0.55s ease, background 0.2s; }
+  .skill-cell:nth-child(1).visible { transition-delay: 0s; }
+  .skill-cell:nth-child(2).visible { transition-delay: 0.07s; }
+  .skill-cell:nth-child(3).visible { transition-delay: 0.14s; }
+  .skill-cell:nth-child(4).visible { transition-delay: 0.21s; }
+  .skill-cell:nth-child(5).visible { transition-delay: 0.28s; }
+  .skill-cell:nth-child(6).visible { transition-delay: 0.35s; }
+  .skill-cell-name { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 18px; }
+  .skill-list { display: flex; flex-direction: column; gap: 8px; }
+  .skill-list span { font-size: 14px; font-weight: 600; color: rgba(245,242,236,0.65); display: flex; align-items: center; gap: 8px; }
+  .skill-list span::before { content: ''; width: 3px; height: 3px; background: rgba(245,242,236,0.2); border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Highlights ── */
+  #highlights { border-top: 1px solid var(--border); }
+  .highlights-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .h-card {
+    background: var(--bg); padding: 36px 32px; position: relative; overflow: hidden; transition: background 0.2s;
+    opacity: 0; transform: translateY(28px);
+  }
+  .h-card:hover { background: var(--surface); }
+  .h-card.wide { grid-column: span 2; }
+  .h-card.dark { background: var(--text); }
+  .h-card.dark:hover { background: #22201a; }
+  .h-card.dark .h-num { color: rgba(245,242,236,0.25); }
+  .h-card.dark .h-title { color: var(--bg); }
+  .h-card.dark .h-desc { color: rgba(245,242,236,0.45); }
+  .h-card.dark .tag { border-color: rgba(255,255,255,0.1); color: rgba(245,242,236,0.35); }
+  .h-card.visible { opacity: 1; transform: none; transition: opacity 0.6s ease, transform 0.6s ease, background 0.2s; }
+  .h-card:nth-child(1).visible { transition-delay: 0s; }
+  .h-card:nth-child(2).visible { transition-delay: 0.1s; }
+  .h-card:nth-child(3).visible { transition-delay: 0.2s; }
+  .h-card:nth-child(4).visible { transition-delay: 0.1s; }
+  .h-card:nth-child(5).visible { transition-delay: 0.2s; }
+  .h-card:nth-child(6).visible { transition-delay: 0.3s; }
+  .h-num { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 16px; }
+  .h-metric { font-size: 52px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; color: var(--accent); margin-bottom: 8px; }
+  .h-title { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+  .h-desc { font-family: var(--font-serif); font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+  /* ── Contact ── */
+  #contact { background: var(--surface2); border-top: 1px solid var(--border); text-align: center; }
+  .contact-headline {
+    font-size: clamp(52px, 8vw, 110px); font-weight: 800; letter-spacing: -0.05em;
+    line-height: 0.88; text-transform: uppercase; margin-bottom: 48px;
+    opacity: 0; transform: translateY(32px);
+    transition: opacity 0.75s ease, transform 0.75s cubic-bezier(0.16,1,0.3,1);
+  }
+  .contact-headline.visible { opacity: 1; transform: none; }
+  .contact-headline em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--muted); }
+  .contact-email {
+    font-family: var(--font-mono); font-size: clamp(14px,1.5vw,18px); color: var(--accent);
+    text-decoration: none; display: inline-block; margin-bottom: 40px;
+    border-bottom: 1px solid var(--accent); padding-bottom: 4px; transition: opacity 0.2s;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.6s 0.15s ease, transform 0.6s 0.15s ease;
+  }
+  .contact-email.visible { opacity: 1; transform: none; }
+  .contact-email:hover { opacity: 0.65; }
+  .contact-socials {
+    display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.6s 0.3s ease, transform 0.6s 0.3s ease;
+  }
+  .contact-socials.visible { opacity: 1; transform: none; }
+  .social-link { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 12px 24px; border: 1px solid var(--border); border-radius: 2px; transition: all 0.2s; }
+  .social-link:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Footer ── */
+  footer {
+    padding: 28px 56px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    opacity: 0; transform: translateY(12px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  footer.visible { opacity: 1; transform: none; }
+  footer span { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
+
+  /* ── Responsive ── */
+  @media (max-width: 960px) {
+    nav { padding: 20px 24px; } .nav-links { display: none; }
+    section { padding: 72px 24px; } #hero { padding: 0 24px 56px; }
+    .hero-footer { flex-direction: column; align-items: flex-start; gap: 24px; }
+    .hero-stats { gap: 32px; }
+    .about-layout { grid-template-columns: 1fr; gap: 48px; }
+    .tl-item { grid-template-columns: 1fr; gap: 16px; }
+    .timeline::before, .tl-item::before { display: none; }
+    .tl-left { padding-left: 0; }
+    .skills-bento { grid-template-columns: repeat(2,1fr); }
+    .highlights-grid { grid-template-columns: 1fr; }
+    .h-card.wide { grid-column: span 1; }
+    footer { flex-direction: column; gap: 10px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-text"><span>A</span><span>R</span><span>Y</span><span>A</span><span>N</span></div>
+  <div class="loader-sub">Software Engineer · Gurgaon</div>
+  <div class="loader-bar-track"><div class="loader-bar"></div></div>
+</div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<nav id="nav">
+  <a href="#" class="nav-logo">aryan.dev</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#highlights">Impact</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="mailto:aryangupta750@gmail.com" class="nav-cta">Hire Me</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="hero-bg-el"></div>
+  <div class="hero-main">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-dot"></div>
+      <span>Software Engineer 2 · PeopleStrong · Gurgaon</span>
+    </div>
+    <h1 class="hero-name">Aryan<br/><em>Gupta</em></h1>
+  </div>
+  <div class="hero-footer">
+    <p class="hero-desc">
+      Building <strong>AI-powered enterprise platforms</strong> and large-scale payroll systems —
+      from <strong>9M+ monthly payslips</strong> to production CrewAI reporting systems
+      serving 400+ enterprise clients across India.
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">$6B+</div>
+        <div class="hero-stat-label">Annual Payroll</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">9M+</div>
+        <div class="hero-stat-label">Payslips / Month</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">400+</div>
+        <div class="hero-stat-label">Enterprise Clients</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT ── -->
+<section id="about">
+  <div class="section-label">01 — About</div>
+  <h2 class="section-title">
+    <span class="title-inner">Who I</span>
+    <em><span class="title-inner">Am</span></em>
+  </h2>
+  <div class="about-layout">
+    <div class="about-body">
+      <p>I'm a <strong>Software Engineer 2 at PeopleStrong</strong>, where I design and ship large-scale backend systems powering HR and payroll operations for hundreds of India's leading enterprises. My work spans revamping legacy architectures to building production AI systems from scratch.</p>
+      <p>I gravitate toward problems needing both engineering depth and product thinking — cutting ETL processing from <strong>48 hours to 12</strong>, building agentic AI pipelines with CrewAI, or shipping Formula Builders that financial analysts actually love using.</p>
+      <p>Outside engineering, I'm a <strong>bug bounty hunter</strong> on HackerOne & BugCrowd, hackathon competitor, and two-time <strong>Golden Performer</strong> — which means I ship things that matter, on time.</p>
+    </div>
+    <div class="about-aside">
+      <div class="aside-block">
+        <div class="aside-label">Education</div>
+        <div class="aside-value">B.Tech — Computer Science<br/>Manipal University Jaipur · 2022</div>
+      </div>
+      <div class="aside-block">
+        <div class="aside-label">Current Role</div>
+        <div class="aside-value">Software Engineer 2<br/>PeopleStrong · Nov 2024 – Present</div>
+      </div>
+      <div class="aside-block">
+        <div class="aside-label">Contact</div>
+        <div class="aside-value">aryangupta750@gmail.com<br/>+91 90019 95589</div>
+      </div>
+      <div class="aside-block">
+        <div class="aside-label">Achievements</div>
+        <div class="chips">
+          <span class="chip red">🥈 Agentic AI Hackathon '24</span>
+          <span class="chip">🏆 1st — National Cyber Olympiad</span>
+          <span class="chip">⭐ Golden Performer ×2</span>
+          <span class="chip">🐛 HackerOne Bug Bounty</span>
+          <span class="chip">🐛 BugCrowd Bug Bounty</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── EXPERIENCE ── -->
+<section id="experience">
+  <div class="section-label">02 — Experience</div>
+  <h2 class="section-title">
+    <span class="title-inner">Where</span>
+    <em><span class="title-inner">I've Built</span></em>
+  </h2>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-period">Nov 2024 — Present</div>
+        <span class="tl-badge current">Current</span>
+      </div>
+      <div class="tl-right">
+        <div class="tl-company">PeopleStrong</div>
+        <div class="tl-role">Software Engineer 2 · Gurgaon</div>
+        <ul class="tl-bullets">
+          <li>Revamped legacy payslip system with <strong>Java + Spring Boot microservices</strong>, auto-generating and emailing <strong>9M+ payslips/month</strong> across $6B+ annual payroll with 99.99% uptime.</li>
+          <li>Built production <strong>AI reporting system</strong> using Python, Django & CrewAI with tool-based routing — <strong>60% query latency reduction</strong>, scaling to 5,000+ concurrent users.</li>
+          <li>Engineered ZIP bundling + signed URL delivery handling <strong>5,000+ concurrent downloads</strong> during peak payroll hours.</li>
+          <li>Shipped <strong>Formula Builder</strong> for custom Excel-like formula evaluation in financial reports, serving 1,000+ daily active users.</li>
+          <li>Implemented Excel export for <strong>1M+ row datasets</strong>, reducing export time by 65%.</li>
+          <li>Redis caching strategy reduced API response times by <strong>45%</strong> for high-traffic analytics endpoints.</li>
+        </ul>
+        <div class="tl-tags">
+          <span class="tag">Java</span><span class="tag">Spring Boot</span><span class="tag">Python</span>
+          <span class="tag">Django</span><span class="tag">CrewAI</span><span class="tag">Redis</span>
+          <span class="tag">Flutter</span><span class="tag">Microservices</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-period">Jul 2022 — Oct 2024</div>
+        <span class="tl-badge">2 yrs 4 mos</span>
+      </div>
+      <div class="tl-right">
+        <div class="tl-company">PeopleStrong</div>
+        <div class="tl-role">Software Engineer · Gurgaon</div>
+        <ul class="tl-bullets">
+          <li>Built <strong>ETL pipelines with Apache Hive & Kylin</strong>, cutting processing from 48hrs → 12hrs (75% reduction) for 150+ clients.</li>
+          <li>Designed data consistency framework ensuring <strong>99.9% accuracy</strong> across distributed sources for 150+ clients.</li>
+          <li>Optimised Kylin aggregation — complex query response from <strong>8 seconds → under 2 seconds</strong>.</li>
+          <li>Built subscription dashboard with <strong>RBAC</strong>, driving 70% revenue increase through improved client engagement.</li>
+          <li>RESTful APIs for reporting serving <strong>10,000+ API calls/day</strong> at sub-100ms latency.</li>
+        </ul>
+        <div class="tl-tags">
+          <span class="tag">Apache Hive</span><span class="tag">Kylin</span><span class="tag">Java</span>
+          <span class="tag">SQL Server</span><span class="tag">Hadoop</span><span class="tag">RBAC</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-period">Jan 2022 — Jul 2022</div>
+        <span class="tl-badge">Internship</span>
+      </div>
+      <div class="tl-right">
+        <div class="tl-company">PeopleStrong</div>
+        <div class="tl-role">Software Engineering Intern · Gurgaon</div>
+        <ul class="tl-bullets">
+          <li>Built analytics dashboards with <strong>Angular + TypeScript</strong> featuring real-time visualization for HR teams.</li>
+          <li>Reusable Angular components reduced dashboard development time by <strong>35%</strong>.</li>
+          <li>Optimized core APIs and datasets for improved performance and system efficiency.</li>
+        </ul>
+        <div class="tl-tags">
+          <span class="tag">Angular</span><span class="tag">TypeScript</span><span class="tag">REST APIs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SKILLS ── -->
+<section id="skills">
+  <div class="section-label">03 — Stack</div>
+  <h2 class="section-title">
+    <span class="title-inner">Tech</span>
+    <em><span class="title-inner">Arsenal</span></em>
+  </h2>
+  <div class="skills-bento">
+    <div class="skill-cell">
+      <div class="skill-cell-name">Languages</div>
+      <div class="skill-list">
+        <span>Java 8+</span><span>Python</span><span>C / C++</span>
+        <span>Dart</span><span>TypeScript</span><span>SQL</span>
+      </div>
+    </div>
+    <div class="skill-cell">
+      <div class="skill-cell-name">Backend & Frameworks</div>
+      <div class="skill-list">
+        <span>Spring Boot</span><span>Django</span><span>Hibernate</span>
+        <span>Microservices</span><span>RESTful APIs</span><span>CrewAI</span>
+      </div>
+    </div>
+    <div class="skill-cell">
+      <div class="skill-cell-name">Databases & Caching</div>
+      <div class="skill-list">
+        <span>SQL Server</span><span>MariaDB</span><span>MongoDB</span>
+        <span>Oracle</span><span>Redis</span>
+      </div>
+    </div>
+    <div class="skill-cell">
+      <div class="skill-cell-name">Big Data & ETL</div>
+      <div class="skill-list">
+        <span>Apache Hive</span><span>Hadoop</span>
+        <span>Apache Kylin</span><span>Impala</span>
+      </div>
+    </div>
+    <div class="skill-cell">
+      <div class="skill-cell-name">Cloud & DevOps</div>
+      <div class="skill-list">
+        <span>AWS</span><span>GCP</span><span>Docker</span>
+        <span>Kafka</span><span>RabbitMQ</span><span>CI/CD</span><span>Git</span>
+      </div>
+    </div>
+    <div class="skill-cell">
+      <div class="skill-cell-name">Frontend & Mobile</div>
+      <div class="skill-list">
+        <span>Angular</span><span>TypeScript</span><span>Flutter</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HIGHLIGHTS ── -->
+<section id="highlights">
+  <div class="section-label">04 — Impact</div>
+  <h2 class="section-title">
+    <span class="title-inner">Numbers</span>
+    <em><span class="title-inner">That Matter</span></em>
+  </h2>
+  <div class="highlights-grid">
+    <div class="h-card wide dark">
+      <div class="h-num">01</div>
+      <div class="h-metric">9M+</div>
+      <div class="h-title">Payslips Generated Monthly</div>
+      <p class="h-desc">Rebuilt legacy payslip architecture into scalable Java + Spring Boot microservices, processing $6B+ in annual payroll across 400+ enterprise clients at 99.99% uptime SLA.</p>
+      <div class="tl-tags" style="margin-top:20px;"><span class="tag">Spring Boot</span><span class="tag">Java</span><span class="tag">Microservices</span></div>
+    </div>
+    <div class="h-card">
+      <div class="h-num">02</div>
+      <div class="h-metric">75%</div>
+      <div class="h-title">Faster ETL Pipelines</div>
+      <p class="h-desc">Apache Hive + Kylin pipelines slashed processing from 48 hours to 12 for HR analytics across 150+ clients.</p>
+    </div>
+    <div class="h-card">
+      <div class="h-num">03</div>
+      <div class="h-metric">60%</div>
+      <div class="h-title">Lower AI Query Latency</div>
+      <p class="h-desc">CrewAI reporting system with context-aware conversation management, serving 5,000+ concurrent users for 400+ enterprise clients.</p>
+    </div>
+    <div class="h-card">
+      <div class="h-num">04</div>
+      <div class="h-metric">70%</div>
+      <div class="h-title">Revenue Increase</div>
+      <p class="h-desc">Subscription dashboard with RBAC drove a 70% jump in revenue through improved client engagement and feature adoption.</p>
+    </div>
+    <div class="h-card dark">
+      <div class="h-num">05</div>
+      <div class="h-metric">&lt;2s</div>
+      <div class="h-title">Kylin Query Response</div>
+      <p class="h-desc">Optimised Kylin cube builds and aggregation strategies, bringing complex analytics from 8 seconds down to under 2 for enterprise BI.</p>
+      <div class="tl-tags" style="margin-top:20px;"><span class="tag">Apache Kylin</span><span class="tag">Hadoop</span></div>
+    </div>
+    <div class="h-card">
+      <div class="h-num">06</div>
+      <div class="h-metric">65%</div>
+      <div class="h-title">Faster Data Exports</div>
+      <p class="h-desc">Excel export for 1M+ row datasets — cutting export time by 65% for enterprise analytics users who rely on daily data.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACT ── -->
+<section id="contact">
+  <div class="section-label" style="justify-content:center; margin-bottom:40px;">05 — Contact</div>
+  <div class="contact-headline">Let's Build<br/><em>Together</em></div>
+  <a href="mailto:aryangupta750@gmail.com" class="contact-email">aryangupta750@gmail.com</a>
+  <div class="contact-socials">
+    <a href="https://linkedin.com/in/aryangupta750" target="_blank" class="social-link">LinkedIn</a>
+    <a href="https://github.com/aryan750" target="_blank" class="social-link">GitHub</a>
+    <a href="tel:+919001995589" class="social-link">+91 90019 95589</a>
+  </div>
+</section>
+
+<footer>
+  <span>© 2025 Aryan Gupta — Software Engineer 2</span>
+  <span>Gurgaon, India</span>
+</footer>
+
+<script>
+  /* ── Loader ── */
+  window.addEventListener('load', () => {
+    setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1700);
+  });
+
+  /* ── Custom cursor ── */
+  const cursor = document.getElementById('cursor');
+  const ring   = document.getElementById('cursor-ring');
+  let mx=0, my=0, rx=0, ry=0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 4 + 'px';
+    cursor.style.top  = my - 4 + 'px';
+  });
+  (function loop() {
+    rx += (mx - rx - 16) * 0.12;
+    ry += (my - ry - 16) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(loop);
+  })();
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.style.transform='scale(2.5)'; ring.style.transform='scale(1.6)'; });
+    el.addEventListener('mouseleave', () => { cursor.style.transform=''; ring.style.transform=''; });
+  });
+
+  /* ── Sticky nav ── */
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40));
+
+  /* ── Scroll animations ── */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.12 });
+
+  // Section labels & titles
+  document.querySelectorAll('.section-label, .section-title').forEach(el => io.observe(el));
+
+  // About paragraphs — observe the container, JS adds class
+  const aboutBody = document.querySelector('.about-body');
+  if (aboutBody) io.observe(aboutBody);
+
+  // Aside blocks — each observed individually
+  document.querySelectorAll('.aside-block').forEach(el => io.observe(el));
+
+  // Timeline items
+  document.querySelectorAll('.tl-item').forEach(el => io.observe(el));
+
+  // Skill cells — individually for stagger
+  document.querySelectorAll('.skill-cell').forEach(el => io.observe(el));
+
+  // Highlight cards — individually for stagger
+  document.querySelectorAll('.h-card').forEach(el => io.observe(el));
+
+  // Contact elements
+  document.querySelectorAll('.contact-headline, .contact-email, .contact-socials').forEach(el => io.observe(el));
+
+  // Footer
+  io.observe(document.querySelector('footer'));
+
+  // Contact section-label (centered, no ::before line needed to animate same way)
+  const contactLabel = document.querySelector('#contact .section-label');
+  if (contactLabel) io.observe(contactLabel);
+</script>
+</body>
+</html>
