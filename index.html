@@ -7,31 +7,67 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:ital,wght@0,300;0,400;1,300&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
+  /* ─────────────────────────────────────────
+     THEME TOKENS
+     --bg / --surface / --surface2 / --border
+     --text / --muted  change per theme.
+     --ink / --ink-sub are ALWAYS dark (used
+     for the inverted Skills & dark-card areas
+     so they don't flip on theme change).
+  ───────────────────────────────────────── */
   :root {
-    --bg: #f5f2ec;
-    --surface: #ede9e0;
+    --bg:       #f5f2ec;
+    --surface:  #ede9e0;
     --surface2: #e5e0d5;
-    --border: rgba(30,25,15,0.1);
-    --text: #1a1810;
-    --muted: #7a7060;
-    --accent: #e8440a;
+    --border:   rgba(30,25,15,0.1);
+    --text:     #1a1810;
+    --muted:    #7a7060;
+    --accent:   #e8440a;
+    /* always-dark palette for inverted sections */
+    --ink:      #1a1810;
+    --ink-sub:  #0e0c09;
+    --ink-hover:#22201a;
+    --ink-text: rgba(245,242,236,0.65);
+    --ink-dim:  rgba(245,242,236,0.25);
+    --ink-border: rgba(255,255,255,0.07);
+    --nav-scrolled: rgba(245,242,236,0.92);
     --font-display: 'Syne', sans-serif;
-    --font-serif: 'Instrument Serif', serif;
-    --font-mono: 'IBM Plex Mono', monospace;
+    --font-serif:   'Instrument Serif', serif;
+    --font-mono:    'IBM Plex Mono', monospace;
   }
 
+  html.dark {
+    --bg:       #0e0d0b;
+    --surface:  #161410;
+    --surface2: #1c1a15;
+    --border:   rgba(255,240,220,0.08);
+    --text:     #f0ece4;
+    --muted:    #8a8272;
+    --nav-scrolled: rgba(14,13,11,0.92);
+  }
+
+  /* smooth theme transition on all themeable props */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font-display); overflow-x: hidden; cursor: none; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-display); overflow-x: hidden; cursor: none;
+    transition: background 0.35s ease, color 0.35s ease;
+  }
 
   /* ── Cursor ── */
   .cursor { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transition: transform 0.15s ease; }
   .cursor-ring { width: 32px; height: 32px; border: 1.5px solid var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; opacity: 0.4; }
 
-  /* ── Loader ── */
-  #loader { position: fixed; inset: 0; background: var(--text); z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; transition: opacity 0.7s ease, visibility 0.7s ease; }
+  /* ── Loader — always dark, never flips ── */
+  #loader {
+    position: fixed; inset: 0; z-index: 1000;
+    background: var(--ink);
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+    transition: opacity 0.7s ease, visibility 0.7s ease;
+  }
   #loader.hidden { opacity: 0; visibility: hidden; }
-  .loader-text { font-size: 52px; font-weight: 800; color: var(--bg); letter-spacing: -0.05em; text-transform: uppercase; overflow: hidden; }
+  .loader-text { font-size: 52px; font-weight: 800; color: #f5f2ec; letter-spacing: -0.05em; text-transform: uppercase; overflow: hidden; }
   .loader-text span { display: inline-block; transform: translateY(100%); animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
   .loader-text span:nth-child(2) { animation-delay: 0.06s; }
   .loader-text span:nth-child(3) { animation-delay: 0.12s; }
@@ -42,26 +78,51 @@
   .loader-bar { height: 100%; background: var(--accent); animation: loadBar 1.3s cubic-bezier(0.4,0,0.2,1) forwards; }
 
   /* ── Keyframes ── */
-  @keyframes slideUp   { to { transform: translateY(0); } }
-  @keyframes fadeIn    { to { opacity: 1; } }
-  @keyframes loadBar   { from { width: 0; } to { width: 100%; } }
-  @keyframes fadeUp    { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes pulse     { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.8); } }
-  @keyframes lineGrow  { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-  @keyframes slideLeft { from { opacity:0; transform: translateX(-28px); } to { opacity:1; transform: translateX(0); } }
-  @keyframes slideRight{ from { opacity:0; transform: translateX(28px); } to { opacity:1; transform: translateX(0); } }
-  @keyframes scaleIn   { from { opacity:0; transform: scale(0.92); } to { opacity:1; transform: scale(1); } }
-  @keyframes countUp   { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+  @keyframes slideUp  { to { transform: translateY(0); } }
+  @keyframes fadeIn   { to { opacity: 1; } }
+  @keyframes loadBar  { from { width: 0; } to { width: 100%; } }
+  @keyframes fadeUp   { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse    { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.8); } }
+  @keyframes spinIn   { from { transform: rotate(-90deg) scale(0.5); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
 
   /* ── Nav ── */
-  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; padding: 24px 56px; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s, border-color 0.3s; border-bottom: 1px solid transparent; }
-  nav.scrolled { background: rgba(245,242,236,0.92); backdrop-filter: blur(16px); border-color: var(--border); }
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+    padding: 24px 56px; display: flex; justify-content: space-between; align-items: center;
+    transition: background 0.3s, border-color 0.3s; border-bottom: 1px solid transparent;
+  }
+  nav.scrolled { background: var(--nav-scrolled); backdrop-filter: blur(16px); border-color: var(--border); }
   .nav-logo { font-family: var(--font-mono); font-size: 13px; color: var(--accent); text-decoration: none; }
   .nav-links { display: flex; gap: 32px; list-style: none; }
   .nav-links a { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
   .nav-links a:hover { color: var(--text); }
-  .nav-cta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bg); background: var(--text); padding: 10px 20px; border-radius: 2px; text-decoration: none; transition: background 0.2s; }
-  .nav-cta:hover { background: var(--accent); }
+
+  /* right cluster */
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+
+  /* Theme toggle button */
+  #theme-toggle {
+    width: 38px; height: 38px; border-radius: 2px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); cursor: none;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0; position: relative; overflow: hidden;
+  }
+  #theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  #theme-toggle svg {
+    width: 15px; height: 15px; stroke: currentColor; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    position: absolute; transition: opacity 0.2s, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  /* sun: visible in light, hidden in dark */
+  .ico-sun  { opacity: 1; transform: rotate(0) scale(1); }
+  .ico-moon { opacity: 0; transform: rotate(90deg) scale(0.5); }
+  html.dark .ico-sun  { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+  html.dark .ico-moon { opacity: 1; transform: rotate(0) scale(1); }
+
+  .nav-cta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bg); background: var(--text); padding: 10px 20px; border-radius: 2px; text-decoration: none; transition: background 0.2s, color 0.2s; }
+  .nav-cta:hover { background: var(--accent); color: #fff; }
 
   /* ── Hero ── */
   #hero { min-height: 100vh; display: grid; grid-template-rows: 1fr auto; padding: 0 56px 72px; position: relative; overflow: hidden; }
@@ -83,7 +144,6 @@
   /* ── Sections ── */
   section { padding: 100px 56px; position: relative; }
 
-  /* Section label — slides in from left with line growing */
   .section-label {
     font-family: var(--font-mono); font-size: 11px; color: var(--accent);
     letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;
@@ -99,16 +159,13 @@
   .section-label.visible { opacity: 1; transform: translateX(0); }
   .section-label.visible::before { transform: scaleX(1); }
 
-  /* Section title — big slide up */
   .section-title {
     font-size: clamp(40px, 5.5vw, 80px); font-weight: 800; letter-spacing: -0.04em;
-    line-height: 0.92; text-transform: uppercase; margin-bottom: 64px;
-    overflow: hidden;
+    line-height: 0.92; text-transform: uppercase; margin-bottom: 64px; overflow: hidden;
   }
   .section-title em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--muted); }
   .section-title .title-inner {
-    display: block;
-    transform: translateY(100%); opacity: 0;
+    display: block; transform: translateY(100%); opacity: 0;
     transition: transform 0.75s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease;
   }
   .section-title.visible .title-inner { transform: translateY(0); opacity: 1; }
@@ -123,7 +180,6 @@
     opacity: 0; transform: translateY(18px);
     transition: opacity 0.6s ease, transform 0.6s ease;
   }
-  .about-body p:nth-child(1) { transition-delay: 0s; }
   .about-body p:nth-child(2) { transition-delay: 0.1s; }
   .about-body p:nth-child(3) { transition-delay: 0.2s; }
   .about-body.visible p { opacity: 1; transform: translateY(0); }
@@ -135,10 +191,9 @@
     transition: opacity 0.55s ease, transform 0.55s ease;
   }
   .aside-block:first-child { border-top: 1px solid var(--border); }
-  .aside-block:nth-child(1) { transition-delay: 0.05s; }
-  .aside-block:nth-child(2) { transition-delay: 0.15s; }
-  .aside-block:nth-child(3) { transition-delay: 0.25s; }
-  .aside-block:nth-child(4) { transition-delay: 0.35s; }
+  .aside-block:nth-child(2) { transition-delay: 0.1s; }
+  .aside-block:nth-child(3) { transition-delay: 0.2s; }
+  .aside-block:nth-child(4) { transition-delay: 0.3s; }
   .aside-block.visible { opacity: 1; transform: translateX(0); }
   .aside-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; }
   .aside-value { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.5; }
@@ -150,7 +205,6 @@
   #experience { border-top: 1px solid var(--border); }
   .timeline { position: relative; }
   .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--border); }
-
   .tl-item {
     display: grid; grid-template-columns: 220px 1fr; gap: 48px;
     padding: 48px 0; border-bottom: 1px solid var(--border); position: relative;
@@ -160,7 +214,6 @@
   .tl-item.visible { opacity: 1; transform: translateY(0); }
   .tl-item:nth-child(2) { transition-delay: 0.12s; }
   .tl-item:nth-child(3) { transition-delay: 0.24s; }
-
   .tl-item::before { content: ''; position: absolute; left: -4px; top: 56px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
   .tl-left { padding-left: 24px; }
   .tl-period { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 8px; }
@@ -175,20 +228,20 @@
   .tl-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px; }
   .tag { font-family: var(--font-mono); font-size: 10px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 2px; color: var(--muted); letter-spacing: 0.04em; }
 
-  /* ── Skills ── */
-  #skills { background: var(--text); border-top: 1px solid var(--border); }
+  /* ── Skills — ALWAYS dark, never flips ── */
+  #skills { background: var(--ink); border-top: 1px solid var(--border); }
   #skills .section-label { color: var(--accent); }
   #skills .section-label::before { background: var(--accent); }
-  #skills .section-title { color: var(--bg); }
-  #skills .section-title em { color: rgba(245,242,236,0.3); }
+  #skills .section-title { color: #f0ece4; }
+  #skills .section-title em { color: rgba(245,242,236,0.28); }
 
-  .skills-bento { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.07); }
+  .skills-bento { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--ink-border); border: 1px solid var(--ink-border); }
   .skill-cell {
-    background: var(--text); padding: 32px 28px; transition: background 0.2s;
+    background: var(--ink); padding: 32px 28px;
     opacity: 0; transform: translateY(20px) scale(0.97);
-    /* JS will add visible class */
+    transition: background 0.2s;
   }
-  .skill-cell:hover { background: #22201a; }
+  .skill-cell:hover { background: var(--ink-hover); }
   .skill-cell.visible { opacity: 1; transform: none; transition: opacity 0.55s ease, transform 0.55s ease, background 0.2s; }
   .skill-cell:nth-child(1).visible { transition-delay: 0s; }
   .skill-cell:nth-child(2).visible { transition-delay: 0.07s; }
@@ -198,24 +251,25 @@
   .skill-cell:nth-child(6).visible { transition-delay: 0.35s; }
   .skill-cell-name { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 18px; }
   .skill-list { display: flex; flex-direction: column; gap: 8px; }
-  .skill-list span { font-size: 14px; font-weight: 600; color: rgba(245,242,236,0.65); display: flex; align-items: center; gap: 8px; }
-  .skill-list span::before { content: ''; width: 3px; height: 3px; background: rgba(245,242,236,0.2); border-radius: 50%; flex-shrink: 0; }
+  .skill-list span { font-size: 14px; font-weight: 600; color: var(--ink-text); display: flex; align-items: center; gap: 8px; }
+  .skill-list span::before { content: ''; width: 3px; height: 3px; background: var(--ink-dim); border-radius: 50%; flex-shrink: 0; }
 
   /* ── Highlights ── */
   #highlights { border-top: 1px solid var(--border); }
   .highlights-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
   .h-card {
-    background: var(--bg); padding: 36px 32px; position: relative; overflow: hidden; transition: background 0.2s;
-    opacity: 0; transform: translateY(28px);
+    background: var(--bg); padding: 36px 32px; position: relative; overflow: hidden;
+    transition: background 0.2s; opacity: 0; transform: translateY(28px);
   }
   .h-card:hover { background: var(--surface); }
   .h-card.wide { grid-column: span 2; }
-  .h-card.dark { background: var(--text); }
-  .h-card.dark:hover { background: #22201a; }
-  .h-card.dark .h-num { color: rgba(245,242,236,0.25); }
-  .h-card.dark .h-title { color: var(--bg); }
-  .h-card.dark .h-desc { color: rgba(245,242,236,0.45); }
-  .h-card.dark .tag { border-color: rgba(255,255,255,0.1); color: rgba(245,242,236,0.35); }
+  /* dark cards — ALWAYS dark, never flips */
+  .h-card.dark { background: var(--ink); }
+  .h-card.dark:hover { background: var(--ink-hover); }
+  .h-card.dark .h-num { color: var(--ink-dim); }
+  .h-card.dark .h-title { color: #f0ece4; }
+  .h-card.dark .h-desc { color: var(--ink-text); }
+  .h-card.dark .tag { border-color: var(--ink-border); color: rgba(245,242,236,0.35); }
   .h-card.visible { opacity: 1; transform: none; transition: opacity 0.6s ease, transform 0.6s ease, background 0.2s; }
   .h-card:nth-child(1).visible { transition-delay: 0s; }
   .h-card:nth-child(2).visible { transition-delay: 0.1s; }
@@ -241,7 +295,7 @@
   .contact-email {
     font-family: var(--font-mono); font-size: clamp(14px,1.5vw,18px); color: var(--accent);
     text-decoration: none; display: inline-block; margin-bottom: 40px;
-    border-bottom: 1px solid var(--accent); padding-bottom: 4px; transition: opacity 0.2s;
+    border-bottom: 1px solid var(--accent); padding-bottom: 4px;
     opacity: 0; transform: translateY(16px);
     transition: opacity 0.6s 0.15s ease, transform 0.6s 0.15s ease;
   }
@@ -253,7 +307,7 @@
     transition: opacity 0.6s 0.3s ease, transform 0.6s 0.3s ease;
   }
   .contact-socials.visible { opacity: 1; transform: none; }
-  .social-link { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 12px 24px; border: 1px solid var(--border); border-radius: 2px; transition: all 0.2s; }
+  .social-link { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 12px 24px; border: 1px solid var(--border); border-radius: 2px; transition: border-color 0.2s, color 0.2s; }
   .social-link:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── Footer ── */
@@ -285,15 +339,18 @@
 </head>
 <body>
 
+<!-- Loader -->
 <div id="loader">
   <div class="loader-text"><span>A</span><span>R</span><span>Y</span><span>A</span><span>N</span></div>
   <div class="loader-sub">Software Engineer · Gurgaon</div>
   <div class="loader-bar-track"><div class="loader-bar"></div></div>
 </div>
 
+<!-- Cursor -->
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursor-ring"></div>
 
+<!-- NAV -->
 <nav id="nav">
   <a href="#" class="nav-logo">aryan.dev</a>
   <ul class="nav-links">
@@ -303,10 +360,31 @@
     <li><a href="#highlights">Impact</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
-  <a href="mailto:aryangupta750@gmail.com" class="nav-cta">Hire Me</a>
+  <div class="nav-right">
+    <!-- Theme toggle -->
+    <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark / light mode">
+      <!-- Sun (light mode icon) -->
+      <svg class="ico-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1"  x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1"  y1="12" x2="3"  y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78"  x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+      </svg>
+      <!-- Moon (dark mode icon) -->
+      <svg class="ico-moon" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+    <a href="mailto:aryangupta750@gmail.com" class="nav-cta">Hire Me</a>
+  </div>
 </nav>
 
-<!-- ── HERO ── -->
+<!-- HERO -->
 <section id="hero">
   <div class="hero-bg-el"></div>
   <div class="hero-main">
@@ -339,7 +417,7 @@
   </div>
 </section>
 
-<!-- ── ABOUT ── -->
+<!-- ABOUT -->
 <section id="about">
   <div class="section-label">01 — About</div>
   <h2 class="section-title">
@@ -379,7 +457,7 @@
   </div>
 </section>
 
-<!-- ── EXPERIENCE ── -->
+<!-- EXPERIENCE -->
 <section id="experience">
   <div class="section-label">02 — Experience</div>
   <h2 class="section-title">
@@ -452,7 +530,7 @@
   </div>
 </section>
 
-<!-- ── SKILLS ── -->
+<!-- SKILLS -->
 <section id="skills">
   <div class="section-label">03 — Stack</div>
   <h2 class="section-title">
@@ -504,7 +582,7 @@
   </div>
 </section>
 
-<!-- ── HIGHLIGHTS ── -->
+<!-- HIGHLIGHTS -->
 <section id="highlights">
   <div class="section-label">04 — Impact</div>
   <h2 class="section-title">
@@ -553,7 +631,7 @@
   </div>
 </section>
 
-<!-- ── CONTACT ── -->
+<!-- CONTACT -->
 <section id="contact">
   <div class="section-label" style="justify-content:center; margin-bottom:40px;">05 — Contact</div>
   <div class="contact-headline">Let's Build<br/><em>Together</em></div>
@@ -571,9 +649,23 @@
 </footer>
 
 <script>
+  /* ── Theme toggle — runs before paint to avoid flash ── */
+  (function() {
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+
   /* ── Loader ── */
   window.addEventListener('load', () => {
     setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1700);
+  });
+
+  /* ── Theme toggle button ── */
+  const toggleBtn = document.getElementById('theme-toggle');
+  toggleBtn.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
   });
 
   /* ── Custom cursor ── */
@@ -602,7 +694,7 @@
   window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40));
 
   /* ── Scroll animations ── */
-  const io = new IntersectionObserver((entries) => {
+  const io = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
       e.target.classList.add('visible');
@@ -610,34 +702,11 @@
     });
   }, { threshold: 0.12 });
 
-  // Section labels & titles
-  document.querySelectorAll('.section-label, .section-title').forEach(el => io.observe(el));
-
-  // About paragraphs — observe the container, JS adds class
-  const aboutBody = document.querySelector('.about-body');
-  if (aboutBody) io.observe(aboutBody);
-
-  // Aside blocks — each observed individually
-  document.querySelectorAll('.aside-block').forEach(el => io.observe(el));
-
-  // Timeline items
-  document.querySelectorAll('.tl-item').forEach(el => io.observe(el));
-
-  // Skill cells — individually for stagger
-  document.querySelectorAll('.skill-cell').forEach(el => io.observe(el));
-
-  // Highlight cards — individually for stagger
-  document.querySelectorAll('.h-card').forEach(el => io.observe(el));
-
-  // Contact elements
-  document.querySelectorAll('.contact-headline, .contact-email, .contact-socials').forEach(el => io.observe(el));
-
-  // Footer
-  io.observe(document.querySelector('footer'));
-
-  // Contact section-label (centered, no ::before line needed to animate same way)
-  const contactLabel = document.querySelector('#contact .section-label');
-  if (contactLabel) io.observe(contactLabel);
+  document.querySelectorAll(
+    '.section-label, .section-title, .about-body, .aside-block, ' +
+    '.tl-item, .skill-cell, .h-card, ' +
+    '.contact-headline, .contact-email, .contact-socials, footer'
+  ).forEach(el => io.observe(el));
 </script>
 </body>
 </html>
